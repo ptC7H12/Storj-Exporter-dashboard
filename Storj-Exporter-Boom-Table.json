@@ -68,8 +68,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
-  "id": null,
-  "iteration": 1656078899169,
+  "id": 8,
   "links": [
     {
       "asDropdown": false,
@@ -179,7 +178,7 @@
         "text": {},
         "textMode": "value_and_name"
       },
-      "pluginVersion": "9.0.1",
+      "pluginVersion": "10.1.1",
       "targets": [
         {
           "datasource": {
@@ -275,7 +274,7 @@
         "text": {},
         "textMode": "auto"
       },
-      "pluginVersion": "9.0.1",
+      "pluginVersion": "10.1.1",
       "targets": [
         {
           "datasource": {
@@ -378,7 +377,7 @@
         "text": {},
         "textMode": "value_and_name"
       },
-      "pluginVersion": "9.0.1",
+      "pluginVersion": "10.1.1",
       "targets": [
         {
           "datasource": {
@@ -507,7 +506,7 @@
         "text": {},
         "textMode": "value_and_name"
       },
-      "pluginVersion": "9.0.1",
+      "pluginVersion": "10.1.1",
       "targets": [
         {
           "datasource": {
@@ -619,7 +618,7 @@
       "default_title_for_rows": "",
       "description": "* DQ - Disqualified\n* SU - Suspended\n* UTD - Up to date",
       "gridPos": {
-        "h": 7,
+        "h": 9,
         "w": 24,
         "x": 0,
         "y": 5
@@ -1064,9 +1063,9 @@
           "bgColors": "red|orange|green",
           "bgColors_overrides": "1->green|0->red|2->yellow",
           "clickable_cells_link": "",
-          "col_name": "SU",
-          "decimals": "3",
-          "defaultBGColor": "",
+          "col_name": "Suspension",
+          "decimals": "2",
+          "defaultBGColor": "darkgreen",
           "defaultTextColor": "",
           "delimiter": "|",
           "displayTemplate": "_value_",
@@ -1082,7 +1081,7 @@
             "value_above": "",
             "value_below": ""
           },
-          "format": "short",
+          "format": "percent",
           "name": "Suspended",
           "null_color": "darkred",
           "null_textcolor": "black",
@@ -1090,13 +1089,13 @@
           "pattern": "^.*Suspended$",
           "row_col_wrapper": "_",
           "row_name": "_0_",
-          "textColors": "green|orange",
+          "textColors": "red|orange|lightgreen",
           "textColors_overrides": "0->green|0.001->yellow",
-          "thresholds": "0.001",
+          "thresholds": "99.5,99.8",
           "time_based_thresholds": [],
           "tooltipTemplate": "Series : _series_ <br/>Row Name : _row_name_ <br/>Col Name : _col_name_ <br/>Value : _value_",
-          "transform_values": "_fa-check-circle_|_fa-times-circle_",
-          "transform_values_overrides": "dot->_fa-circle_",
+          "transform_values": "_value_|_value_|_value_",
+          "transform_values_overrides": "0->down|1->up",
           "valueName": "current"
         },
         {
@@ -1182,7 +1181,7 @@
       "pluginVersion": "7.3.0",
       "row_col_wrapper": "_",
       "sorting_props": {
-        "col_index": 0,
+        "col_index": 1,
         "direction": "desc"
       },
       "targets": [
@@ -1251,9 +1250,11 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
+          "editorMode": "code",
           "expr": "sum(storj_payout_currentMonth{type=~\"payout|held\",instance=~\"$node.*\"}) by (instance) / 100",
           "interval": "",
           "legendFormat": "{{instance}} | Earnings",
+          "range": true,
           "refId": "H"
         },
         {
@@ -1308,6 +1309,20 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "min (storj_sat_audit{type=\"suspensionScore\",instance=~\"$node.*\"}) by(instance) * 100",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "{{instance}} | Suspended",
+          "range": true,
+          "refId": "L"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
           "exemplar": false,
           "expr": "storj_node_info{instance=~\"$node.*\", type=\"version\"}",
           "format": "time_series",
@@ -1338,17 +1353,6 @@
           "interval": "",
           "legendFormat": "{{instance}} | Disqualified",
           "refId": "K"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          },
-          "expr": "avg (storj_sat_summary{type=\"suspended\",instance=~\"$node.*\"}) by(instance)",
-          "hide": false,
-          "interval": "",
-          "legendFormat": "{{instance}} | Suspended",
-          "refId": "L"
         }
       ],
       "text_alignment_firstcolumn": "right",
@@ -1356,78 +1360,150 @@
       "type": "yesoreyeram-boomtable-panel"
     },
     {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
       "datasource": {
         "type": "prometheus",
         "uid": "${DS_PROMETHEUS}"
       },
       "fieldConfig": {
         "defaults": {
-          "links": []
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "Rate-out (-) / Rate-in (+)",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 70,
+            "gradientMode": "opacity",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "links": [],
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "bps"
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/RateOut/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#96D98D",
+                  "mode": "fixed"
+                }
+              },
+              {
+                "id": "custom.stacking",
+                "value": {
+                  "group": "A",
+                  "mode": "normal"
+                }
+              },
+              {
+                "id": "custom.transform",
+                "value": "negative-Y"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/RateIn/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#5794F2",
+                  "mode": "fixed"
+                }
+              },
+              {
+                "id": "custom.stacking",
+                "value": {
+                  "group": "B",
+                  "mode": "normal"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "0"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "rgb(4, 4, 4)",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
       },
-      "fill": 1,
-      "fillGradient": 7,
       "gridPos": {
         "h": 8,
         "w": 24,
         "x": 0,
-        "y": 12
+        "y": 14
       },
-      "hiddenSeries": false,
       "id": 297,
       "interval": "",
-      "legend": {
-        "alignAsTable": false,
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "rightSide": false,
-        "show": false,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "nullPointMode": "null",
       "options": {
-        "alertThreshold": true
-      },
-      "percentage": false,
-      "pluginVersion": "9.0.1",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [
-        {
-          "$$hashKey": "object:145",
-          "alias": "/RateOut/",
-          "color": "#96D98D",
-          "stack": "A",
-          "transform": "negative-Y"
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": false
         },
-        {
-          "$$hashKey": "object:146",
-          "alias": "/RateIn/",
-          "color": "#5794F2",
-          "stack": "B"
-        },
-        {
-          "$$hashKey": "object:147",
-          "alias": "0",
-          "color": "rgb(4, 4, 4)",
-          "hideTooltip": true,
-          "legend": false
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
         }
-      ],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
+      },
+      "pluginVersion": "10.1.1",
       "targets": [
         {
           "datasource": {
@@ -1467,131 +1543,228 @@
           "refId": "E"
         }
       ],
-      "thresholds": [],
-      "timeRegions": [],
       "title": "Net IO by node (stacked)",
-      "tooltip": {
-        "shared": true,
-        "sort": 2,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "mode": "time",
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "$$hashKey": "object:176",
-          "format": "bps",
-          "label": "Rate-out (-) / Rate-in (+)",
-          "logBase": 1,
-          "show": true
-        },
-        {
-          "$$hashKey": "object:177",
-          "format": "bps",
-          "label": "Net monthly sum",
-          "logBase": 1,
-          "show": false
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": 0
-      }
+      "type": "timeseries"
     },
     {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
       "datasource": {
         "type": "prometheus",
         "uid": "${DS_PROMETHEUS}"
       },
       "fieldConfig": {
         "defaults": {
-          "links": []
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "Sum-out (-) / Sum-in (+)",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 70,
+            "gradientMode": "opacity",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "links": [],
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "decbytes"
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/RateOut/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#96d98d",
+                  "mode": "fixed"
+                }
+              },
+              {
+                "id": "custom.stacking",
+                "value": {
+                  "group": "A",
+                  "mode": "normal"
+                }
+              },
+              {
+                "id": "custom.transform",
+                "value": "negative-Y"
+              },
+              {
+                "id": "unit",
+                "value": "bps"
+              },
+              {
+                "id": "custom.axisLabel",
+                "value": "Rate-in (+) / Rate-out (-)"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/RateIn/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#5794F2",
+                  "mode": "fixed"
+                }
+              },
+              {
+                "id": "custom.stacking",
+                "value": {
+                  "group": "B",
+                  "mode": "normal"
+                }
+              },
+              {
+                "id": "unit",
+                "value": "bps"
+              },
+              {
+                "id": "custom.axisLabel",
+                "value": "Rate-in (+) / Rate-out (-)"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/SumOut/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "rgb(29, 74, 23)",
+                  "mode": "fixed"
+                }
+              },
+              {
+                "id": "custom.fillOpacity",
+                "value": 20
+              },
+              {
+                "id": "custom.lineWidth",
+                "value": 1
+              },
+              {
+                "id": "custom.stacking",
+                "value": {
+                  "group": "C",
+                  "mode": "normal"
+                }
+              },
+              {
+                "id": "custom.transform",
+                "value": "negative-Y"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/SumIn/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "rgb(15, 59, 128)",
+                  "mode": "fixed"
+                }
+              },
+              {
+                "id": "custom.fillOpacity",
+                "value": 20
+              },
+              {
+                "id": "custom.lineWidth",
+                "value": 1
+              },
+              {
+                "id": "custom.stacking",
+                "value": {
+                  "group": "D",
+                  "mode": "normal"
+                }
+              },
+              {
+                "id": "custom.lineStyle",
+                "value": {
+                  "dash": [
+                    10,
+                    10
+                  ],
+                  "fill": "solid"
+                }
+              }
+            ]
+          }
+        ]
       },
-      "fill": 7,
-      "fillGradient": 7,
       "gridPos": {
         "h": 6,
         "w": 12,
         "x": 0,
-        "y": 20
+        "y": 22
       },
-      "hiddenSeries": false,
       "id": 299,
       "interval": "",
-      "legend": {
-        "alignAsTable": false,
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "rightSide": false,
-        "show": false,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "nullPointMode": "null",
       "options": {
-        "alertThreshold": true
-      },
-      "percentage": false,
-      "pluginVersion": "9.0.1",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [
-        {
-          "$$hashKey": "object:499",
-          "alias": "/RateOut/",
-          "color": "#96d98d",
-          "stack": "A",
-          "transform": "negative-Y",
-          "yaxis": 2
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": false
         },
-        {
-          "$$hashKey": "object:500",
-          "alias": "/RateIn/",
-          "color": "#5794F2",
-          "stack": "B",
-          "yaxis": 2
-        },
-        {
-          "$$hashKey": "object:501",
-          "alias": "/SumOut/",
-          "color": "rgb(29, 74, 23)",
-          "fill": 2,
-          "fillGradient": 0,
-          "legend": false,
-          "linewidth": 1,
-          "stack": "C",
-          "transform": "negative-Y"
-        },
-        {
-          "$$hashKey": "object:502",
-          "alias": "/SumIn/",
-          "color": "rgb(15, 59, 128)",
-          "dashes": false,
-          "fill": 2,
-          "fillGradient": 0,
-          "legend": false,
-          "linewidth": 1,
-          "stack": "D"
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
         }
-      ],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
+      },
+      "pluginVersion": "10.1.1",
       "targets": [
         {
           "datasource": {
@@ -1646,98 +1819,109 @@
           "refId": "B"
         }
       ],
-      "thresholds": [],
-      "timeRegions": [],
       "title": "Repair IO/sum by node (monthly stacked)",
-      "tooltip": {
-        "shared": true,
-        "sort": 2,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "mode": "time",
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "$$hashKey": "object:551",
-          "format": "decbytes",
-          "label": "Sum-out (-) / Sum-in (+)",
-          "logBase": 1,
-          "show": true
-        },
-        {
-          "$$hashKey": "object:552",
-          "format": "bps",
-          "label": "Rate-in (+) / Rate-out (-)",
-          "logBase": 1,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": true
-      }
+      "type": "timeseries"
     },
     {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
       "datasource": {
         "type": "prometheus",
         "uid": "${DS_PROMETHEUS}"
       },
       "fieldConfig": {
         "defaults": {
-          "links": []
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 80,
+            "gradientMode": "opacity",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineStyle": {
+              "fill": "solid"
+            },
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "normal"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "decimals": 2,
+          "links": [],
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "bps"
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/DiskRate/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#73BF69",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
       },
-      "fill": 1,
-      "fillGradient": 8,
       "gridPos": {
         "h": 6,
         "w": 12,
         "x": 12,
-        "y": 20
+        "y": 22
       },
-      "hiddenSeries": false,
       "id": 298,
       "interval": "",
-      "legend": {
-        "alignAsTable": false,
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "rightSide": false,
-        "show": false,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "nullPointMode": "null",
       "options": {
-        "alertThreshold": true
-      },
-      "percentage": false,
-      "pluginVersion": "9.0.1",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [
-        {
-          "$$hashKey": "object:237",
-          "alias": "/DiskRate/",
-          "color": "#73BF69"
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": false
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
         }
-      ],
-      "spaceLength": 10,
-      "stack": true,
-      "steppedLine": false,
+      },
+      "pluginVersion": "10.1.1",
       "targets": [
         {
           "datasource": {
@@ -1754,41 +1938,8 @@
           "refId": "B"
         }
       ],
-      "thresholds": [],
-      "timeRegions": [],
       "title": "Storage IO by node (stacked)",
-      "tooltip": {
-        "shared": true,
-        "sort": 2,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "mode": "time",
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "$$hashKey": "object:244",
-          "decimals": 2,
-          "format": "bps",
-          "label": "",
-          "logBase": 1,
-          "show": true
-        },
-        {
-          "$$hashKey": "object:245",
-          "decimals": 2,
-          "format": "bps",
-          "label": "Storage sum",
-          "logBase": 1,
-          "show": false
-        }
-      ],
-      "yaxis": {
-        "align": false
-      }
+      "type": "timeseries"
     },
     {
       "collapsed": false,
@@ -1800,7 +1951,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 26
+        "y": 28
       },
       "id": 42,
       "panels": [],
@@ -1861,7 +2012,7 @@
         "h": 7,
         "w": 12,
         "x": 0,
-        "y": 27
+        "y": 29
       },
       "hide_first_column": false,
       "hide_headers": false,
@@ -2273,97 +2424,216 @@
       "type": "yesoreyeram-boomtable-panel"
     },
     {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
       "datasource": {
         "type": "prometheus",
         "uid": "${DS_PROMETHEUS}"
       },
-      "decimals": 1,
       "description": "",
       "fieldConfig": {
         "defaults": {
-          "links": []
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "Sum-out (-) / Sum-in (+) / ",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 70,
+            "gradientMode": "opacity",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "links": [],
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "decbytes"
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/RateOut/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#96D98D",
+                  "mode": "fixed"
+                }
+              },
+              {
+                "id": "custom.stacking",
+                "value": {
+                  "group": "A",
+                  "mode": "normal"
+                }
+              },
+              {
+                "id": "custom.transform",
+                "value": "negative-Y"
+              },
+              {
+                "id": "unit",
+                "value": "bps"
+              },
+              {
+                "id": "custom.axisLabel",
+                "value": "Rate-in (+) / Rate-out (-)"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/RateIn/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#5794F2",
+                  "mode": "fixed"
+                }
+              },
+              {
+                "id": "custom.stacking",
+                "value": {
+                  "group": "B",
+                  "mode": "normal"
+                }
+              },
+              {
+                "id": "unit",
+                "value": "bps"
+              },
+              {
+                "id": "custom.axisLabel",
+                "value": "Rate-in (+) / Rate-out (-)"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/SumOut/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#37872D",
+                  "mode": "fixed"
+                }
+              },
+              {
+                "id": "custom.fillOpacity",
+                "value": 20
+              },
+              {
+                "id": "custom.lineWidth",
+                "value": 1
+              },
+              {
+                "id": "custom.stacking",
+                "value": {
+                  "group": "C",
+                  "mode": "normal"
+                }
+              },
+              {
+                "id": "custom.transform",
+                "value": "negative-Y"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/SumIn/"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "rgb(12, 56, 122)",
+                  "mode": "fixed"
+                }
+              },
+              {
+                "id": "custom.fillOpacity",
+                "value": 20
+              },
+              {
+                "id": "custom.lineWidth",
+                "value": 1
+              },
+              {
+                "id": "custom.stacking",
+                "value": {
+                  "group": "D",
+                  "mode": "normal"
+                }
+              }
+            ]
+          }
+        ]
       },
-      "fill": 1,
-      "fillGradient": 7,
       "gridPos": {
         "h": 7,
         "w": 12,
         "x": 12,
-        "y": 27
+        "y": 29
       },
-      "hiddenSeries": false,
       "id": 393,
       "interval": "",
-      "legend": {
-        "alignAsTable": false,
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "rightSide": true,
-        "show": false,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "nullPointMode": "null",
       "options": {
-        "alertThreshold": false
-      },
-      "percentage": false,
-      "pluginVersion": "9.0.1",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "repeatDirection": "v",
-      "seriesOverrides": [
-        {
-          "$$hashKey": "object:1708",
-          "alias": "/RateOut/",
-          "color": "#96D98D",
-          "stack": "A",
-          "transform": "negative-Y",
-          "yaxis": 2
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "right",
+          "showLegend": false
         },
-        {
-          "$$hashKey": "object:1709",
-          "alias": "/RateIn/",
-          "color": "#5794F2",
-          "stack": "B",
-          "yaxis": 2
-        },
-        {
-          "$$hashKey": "object:1710",
-          "alias": "/SumOut/",
-          "color": "#37872D",
-          "fill": 2,
-          "fillGradient": 0,
-          "legend": false,
-          "linewidth": 1,
-          "stack": "C",
-          "transform": "negative-Y"
-        },
-        {
-          "$$hashKey": "object:1711",
-          "alias": "/SumIn/",
-          "color": "rgb(12, 56, 122)",
-          "fill": 2,
-          "fillGradient": 0,
-          "legend": false,
-          "linewidth": 1,
-          "stack": "D"
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
         }
-      ],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
+      },
+      "pluginVersion": "10.1.1",
+      "repeatDirection": "v",
       "targets": [
         {
           "datasource": {
@@ -2416,49 +2686,16 @@
           "refId": "B"
         }
       ],
-      "thresholds": [],
-      "timeRegions": [],
       "title": "$node Net IO/sum (monthly)",
-      "tooltip": {
-        "shared": true,
-        "sort": 2,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "mode": "time",
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "$$hashKey": "object:1768",
-          "format": "decbytes",
-          "label": "Sum-out (-) / Sum-in (+) / ",
-          "logBase": 1,
-          "show": true
-        },
-        {
-          "$$hashKey": "object:1769",
-          "format": "bps",
-          "label": "Rate-in (+) / Rate-out (-)",
-          "logBase": 1,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": true
-      }
+      "type": "timeseries"
     }
   ],
   "refresh": "",
-  "schemaVersion": 36,
+  "schemaVersion": 38,
   "style": "dark",
   "tags": [
     "storj",
-    "docker",
-    "prometheus",
-    "exporter"
+    "prometheus"
   ],
   "templating": {
     "list": [
@@ -2466,7 +2703,7 @@
         "current": {
           "selected": false,
           "text": "Prometheus",
-          "value": "Prometheus"
+          "value": "PBFA97CFB590B2093"
         },
         "hide": 0,
         "includeAll": false,
@@ -2482,7 +2719,11 @@
         "type": "datasource"
       },
       {
-        "current": {},
+        "current": {
+          "selected": false,
+          "text": "All",
+          "value": "$__all"
+        },
         "datasource": {
           "type": "prometheus",
           "uid": "${DS_PROMETHEUS}"
@@ -2528,8 +2769,8 @@
     ]
   },
   "timezone": "",
-  "title": "Storj-Exporter-Boom-Table",
-  "uid": "teLFQE2Wkdd",
-  "version": 12,
+  "title": "Storj Dashboard",
+  "uid": "f2ab253d-d097-4dbf-a022-8fb9f517dd55",
+  "version": 10,
   "weekStart": ""
 }
